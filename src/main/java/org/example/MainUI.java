@@ -7,6 +7,8 @@ import java.util.Objects;
 
 
 public class MainUI extends JFrame {
+    private static String START_THE_GAME="开始游戏";
+
     private Integer Xsize = 720;
     private Integer Ysize = 900;
     private CellState[][] cells;
@@ -77,7 +79,9 @@ public class MainUI extends JFrame {
                 }
             }
         }
-
+        graphics.setFont(new Font("黑体",Font.BOLD,20));
+        graphics.drawRect(10,750+35,120,36);
+        graphics.drawString(START_THE_GAME,13,750+35+3);
     }
 
 
