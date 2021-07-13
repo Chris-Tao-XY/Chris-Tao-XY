@@ -217,26 +217,27 @@ public class MainUI extends JFrame {
                     if ((y - 50) % 35 <= 17.5) {
                         ry = (y - 50) / 35 - 1;
                     } else ry = (y - 50) / 35;
-                }
-                if (Objects.equals(cells[ry][rx], CellState.NULL)) {
-                    if (Objects.equals(NextPlayer.BLACK, nextPlayer)) {
-                        cells[ry][rx] = CellState.BLACK;
-                        nextPlayer = NextPlayer.WHITE;
-                        state = WHITE_TERM;
-                    } else {
-                        cells[ry][rx] = CellState.WHITE;
-                        nextPlayer = NextPlayer.BLACK;
-                        state = BLACK_TERM;
-                    }
-                    MainUI.this.repaint();
-                    if (isWin(ry, rx)) {
-                        canPlay = false;
-                        if (Objects.equals(cells[ry][rx], CellState.BLACK)) {
-                            state = BLACK_WIN;
-                        } else state = WHITE_WIN;
+                    if (Objects.equals(cells[ry][rx], CellState.NULL)) {
+                        if (Objects.equals(NextPlayer.BLACK, nextPlayer)) {
+                            cells[ry][rx] = CellState.BLACK;
+                            nextPlayer = NextPlayer.WHITE;
+                            state = WHITE_TERM;
+                        } else {
+                            cells[ry][rx] = CellState.WHITE;
+                            nextPlayer = NextPlayer.BLACK;
+                            state = BLACK_TERM;
+                        }
                         MainUI.this.repaint();
+                        if (isWin(ry, rx)) {
+                            canPlay = false;
+                            if (Objects.equals(cells[ry][rx], CellState.BLACK)) {
+                                state = BLACK_WIN;
+                            } else state = WHITE_WIN;
+                            MainUI.this.repaint();
+                        }
                     }
                 }
+
             }
         }
 
