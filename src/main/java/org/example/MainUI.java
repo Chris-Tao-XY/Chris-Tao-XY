@@ -1,14 +1,14 @@
 package org.example;
 
 
-import javafx.scene.control.Cell;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Stack;
 
 
 public class MainUI extends JFrame {
@@ -19,43 +19,18 @@ public class MainUI extends JFrame {
     private final static String WHITE_TERM = "白棋准备";
     private final static String BLACK_WIN = "黑棋胜利";
     private final static String WHITE_WIN = "白棋胜利";
-    private Integer Xsize = 720;
-    private Integer Ysize = 900;
+    private final static String REGRET_ONE_TERM = "悔棋";
+    private final static String PLAY_WITH_AI = "和AI对战";
+    private boolean AIPlay = false;
+    private final Integer Xsize = 720;
+    private final Integer Ysize = 900;
     private CellState[][] cells;
-    private String state = "开始";
-    private boolean canPlay = true;
+    private String state = "双方准备";
+    private boolean winned = false;
+    private final Stack<Integer> XStack = new Stack<>();
+    private final Stack<Integer> YStack = new Stack<>();
+    private boolean canPlay = false;
 
-    public boolean isCanPlay() {
-        return canPlay;
-    }
-
-    public void setCanPlay(boolean canPlay) {
-        this.canPlay = canPlay;
-    }
-
-    public Integer getXsize() {
-        return Xsize;
-    }
-
-    public void setXsize(Integer xsize) {
-        Xsize = xsize;
-    }
-
-    public Integer getYsize() {
-        return Ysize;
-    }
-
-    public void setYsize(Integer ysize) {
-        Ysize = ysize;
-    }
-
-    public CellState[][] getCells() {
-        return cells;
-    }
-
-    public void setCells(CellState[][] cells) {
-        this.cells = cells;
-    }
 
     public MainUI() {
         super();
@@ -71,7 +46,7 @@ public class MainUI extends JFrame {
     }
 
     public void initCells() {
-        this.cells = new CellState[20][20];
+        this.cells = new CellState[19][19];
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[i].length; j++) {
                 cells[i][j] = CellState.NULL;
@@ -83,34 +58,38 @@ public class MainUI extends JFrame {
     public boolean isWin(int i, int j) {
         int count = 0;
         CellState thisState = cells[i][j];
-        int startx = i - 4 >= 0 ? i - 4 : 0;
-        int endx = i + 4 <= 19 ? i + 4 : 19;
-        int starty = j - 4 >= 0 ? j - 4 : 0;
-        int endy = j + 4 <= 19 ? j + 4 : 19;
+        int startx = Math.max(i - 4, 0);
+        int endx = Math.min(i + 4, 18);
+        int starty = Math.max(j - 4, 0);
+        int endy = Math.min(j + 4, 18);
         for (int p = startx; p <= endx; p++) {
-            if (Objects.equals(thisState, cells[i][p])) {
+            if (Objects.equals(thisState, cells[p][j])) {
                 count++;
-                if (count == 5) return true;
+                if (count == 5) {
+                    return winned = true;
+                }
             } else {
                 count = 0;
             }
         }
         count = 0;
         for (int p = starty; p <= endy; p++) {
-            if (Objects.equals(thisState, cells[p][j])) {
+            if (Objects.equals(thisState, cells[i][p])) {
                 count++;
-                if (count == 5) return true;
+                if (count == 5) {
+                    return winned = true;
+                }
             } else {
                 count = 0;
             }
         }
         count = 0;
-        int p = 0;
-        int q = 0;
+        int p;
+        int q;
         for (p = startx, q = starty; p <= endx && q <= endy; p++, q++) {
             if (Objects.equals(thisState, cells[p][q])) {
                 count++;
-                if (count == 5) return true;
+                if (count == 5) return winned = true;
             } else {
                 count = 0;
             }
@@ -119,7 +98,7 @@ public class MainUI extends JFrame {
         for (p = startx, q = endy; p <= endx && q >= starty; p++, q--) {
             if (Objects.equals(thisState, cells[p][q])) {
                 count++;
-                if (count == 5) return true;
+                if (count == 5) return winned = true;
             } else {
                 count = 0;
             }
@@ -159,8 +138,11 @@ public class MainUI extends JFrame {
         graphics1.drawString(RESTART_THE_GAME, 10 + 100 + 10 + 3, 770 + 35 + 3);
         graphics1.drawRect(10 + 200 + 20, 750 + 35, 100, 36);
         graphics1.drawString(ADMIT_THE_LOSE, 10 + 200 + 20 + 3, 770 + 35 + 3);
-        graphics1.drawRect(10 + 300 + 30, 750 + 35, 100, 36);
         graphics1.drawString(state, 10 + 300 + 30 + 3, 770 + 35 + 3);
+        graphics1.drawRect(10 + 400 + 40, 750 + 35, 100, 36);
+        graphics1.drawString(REGRET_ONE_TERM, 10 + 400 + 40 + 3, 770 + 35 + 3);
+        graphics1.drawRect(10 + 500 + 50, 750 + 35, 100, 36);
+        graphics1.drawString(PLAY_WITH_AI, 10 + 500 + 50 + 3, 770 + 35 + 3);
         graphics.drawImage(buf, 0, 0, this);
     }
 
@@ -170,47 +152,16 @@ public class MainUI extends JFrame {
         private Integer x;
         private Integer y;
         private Graphics graphics;
-
-        public Integer getX() {
-            return x;
-        }
-
-        public void setX(Integer x) {
-            this.x = x;
-        }
-
-        public Integer getY() {
-            return y;
-        }
-
-        public void setY(Integer y) {
-            this.y = y;
-        }
-
-        public Graphics getGraphics() {
-            return graphics;
-        }
-
-        public NextPlayer getNextPlayer() {
-            return nextPlayer;
-        }
-
-        public void setNextPlayer(NextPlayer nextPlayer) {
-            this.nextPlayer = nextPlayer;
-        }
-
-        public void setGraphics(Graphics graphics) {
-            this.graphics = graphics;
-        }
+        private AI ai;
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (canPlay) {
-                x = e.getX();
-                y = e.getY();
-                int rx = 0;
-                int ry = 0;
-                if (x < 710-17.5 && x > 10 + 35 && y > 50 + 35 && y < 750-17.5) {
+            x = e.getX();
+            y = e.getY();
+            if (x < 710 - 17.5 && x > 10 + 35 && y > 50 + 35 && y < 750 - 17.5) {
+                if (canPlay) {
+                    int rx;
+                    int ry;
                     if ((x - 10) % 35 <= 17.5) {
                         rx = (x - 10) / 35 - 1;
                     } else rx = (x - 10) / 35;
@@ -220,12 +171,12 @@ public class MainUI extends JFrame {
                     if (Objects.equals(cells[ry][rx], CellState.NULL)) {
                         if (Objects.equals(NextPlayer.BLACK, nextPlayer)) {
                             cells[ry][rx] = CellState.BLACK;
-                            nextPlayer = NextPlayer.WHITE;
-                            state = WHITE_TERM;
+                            XStack.push(ry);
+                            YStack.push(rx);
                         } else {
                             cells[ry][rx] = CellState.WHITE;
-                            nextPlayer = NextPlayer.BLACK;
-                            state = BLACK_TERM;
+                            XStack.push(ry);
+                            YStack.push(rx);
                         }
                         MainUI.this.repaint();
                         if (isWin(ry, rx)) {
@@ -233,9 +184,75 @@ public class MainUI extends JFrame {
                             if (Objects.equals(cells[ry][rx], CellState.BLACK)) {
                                 state = BLACK_WIN;
                             } else state = WHITE_WIN;
-                            MainUI.this.repaint();
+                        } else {
+                            if (!AIPlay) {
+                                if (Objects.equals(cells[ry][rx], CellState.BLACK)) {
+                                    nextPlayer = NextPlayer.WHITE;
+                                    state = WHITE_TERM;
+                                } else {
+                                    nextPlayer = NextPlayer.BLACK;
+                                    state = BLACK_TERM;
+                                }
+                            }else {
+                                ai.search();
+                            }
+                        }
+                        MainUI.this.repaint();
+                    }
+                }
+
+            } else if (x > 10 + 400 + 40 && x < 10 + 500 + 40 && y > 750 + 35 && y < 750 + 35 + 36) {
+                if (canPlay && !XStack.isEmpty()) {
+                    int confirm = JOptionPane.showConfirmDialog(null, "Do you confirm to regret?", "Confirm", JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+                    if (confirm == 0) {
+                        int x = XStack.pop();
+                        int y = YStack.pop();
+                        CellState cellState = cells[x][y];
+                        if (Objects.equals(cellState, CellState.BLACK)) {
+                            nextPlayer = NextPlayer.BLACK;
+                            state = BLACK_TERM;
+                        } else {
+                            nextPlayer = NextPlayer.WHITE;
+                            state = WHITE_TERM;
+                        }
+                        cells[x][y] = CellState.NULL;
+                        MainUI.this.repaint();
+                    }
+                }
+
+            } else if (x > 10 && x < 10 + 100 && y > 750 + 35 && y < 750 + 35 + 36) {
+                if (!winned && !canPlay) {
+                    canPlay = true;
+                    state = BLACK_TERM;
+                    MainUI.this.repaint();
+                }
+
+            } else if (x > 10 + 100 + 10 && x < 10 + 200 + 10 && y > 750 + 35 && y < 750 + 35 + 36) {
+                int confirm = JOptionPane.showConfirmDialog(null, "Do you confirm to restart?", "Confirm",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (confirm == 0) {
+                    for (int i = 0; i < cells.length; i++) {
+                        for (int j = 0; j < cells[i].length; j++) {
+                            cells[i][j] = CellState.NULL;
                         }
                     }
+                    canPlay = false;
+                    winned = false;
+                    nextPlayer = NextPlayer.BLACK;
+                    state = "双方准备";
+                    MainUI.this.repaint();
+                }
+            } else if (x > 10 + 500 + 50 && x < 10 + 600 + 50 && y > 750 + 35 && y < 750 + 35 + 36) {
+                int confirm = JOptionPane.showConfirmDialog(null, "Do you play with AI?", "Confirm",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (confirm==0){
+                    AIPlay = true;
+                    ai = new AI();
+                    ai.setAIColor(CellState.WHITE);
+                    ai.setManColor(CellState.BLACK);
                 }
 
             }
@@ -263,4 +280,211 @@ public class MainUI extends JFrame {
     }
 
 
+    class AI {
+        private final int[][] score = new int[19][19];
+        private CellState AIColor;
+        private CellState manColor;
+
+        public CellState getAIColor() {
+            return AIColor;
+        }
+
+        public void setAIColor(CellState AIColor) {
+            this.AIColor = AIColor;
+        }
+
+        public CellState getManColor() {
+            return manColor;
+        }
+
+        public void setManColor(CellState manColor) {
+            this.manColor = manColor;
+        }
+
+        public int getScore(int AIChessNum, int manChessNum) {
+            if (AIChessNum > 0 && manChessNum > 0) {
+                return 0;
+            }
+            if (manChessNum == 0 && AIChessNum == 0) {
+                return 7;
+            }
+            if (AIChessNum == 1) {
+                return 35;
+            }
+            if (AIChessNum == 2) {
+                return 800;
+            }
+            if (AIChessNum == 3) {
+                return 15000;
+            }
+            if (AIChessNum == 4) {
+                return 800000;
+            }
+            if (manChessNum == 1) {
+                return 15;
+            }
+            if (manChessNum == 2) {
+                return 400;
+            }
+            if (manChessNum == 3) {
+                return 1800;
+            }
+            if (manChessNum == 4) {
+                return 100000;
+            }
+            return -1;
+        }
+
+        public void search() {
+            int xMax = -1;
+            int yMAX = -1;
+            int maxScore = 0;
+            int AIChessNum = 0;
+            int manChessNum = 0;
+            int tempScore;
+            for (int i = 0; i < score.length; i++) {
+                for (int j = 0; j < score[i].length; j++) {
+                    score[i][j] = 0;
+                }
+            }
+            for (int i = 0; i < 19; i++) {
+                for (int j = 0; j < 15; j++) {
+                    for (int k = j; k < j + 5; k++) {
+                        if (Objects.equals(cells[i][k], AIColor)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[i][k], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    tempScore = getScore(AIChessNum, manChessNum);
+                    for (int k = j; k < j + 5; k++) {
+                        score[i][k] += tempScore;
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+            }
+            for (int i = 0; i < 19; i++) {
+                for (int j = 0; j < 15; j++) {
+                    for (int k = j; k < j + 5; k++) {
+                        if (Objects.equals(cells[k][i], AIColor)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[k][i], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    tempScore = getScore(AIChessNum, manChessNum);
+                    for (int k = j; k < j + 5; k++) {
+                        score[k][i] += tempScore;
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+            }
+            for (int i = 18; i >= 4; i--) {
+                for (int k = i, j = 0; j < 19 && k >= 0; j++, k--) {
+                    int m = k;
+                    int n = j;
+                    for (; m > k - 5 && k - 5 > 0; m--, n++) {
+                        if (Objects.equals(cells[m][n], AIColor)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[m][n], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    if (m == k - 5) {
+                        tempScore = getScore(AIChessNum, manChessNum);
+                        for (m = k, n = j; m > k - 5; m--, n++) {
+                            score[m][n] += tempScore;
+                        }
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+
+            }
+            for (int i = 1; i < 19; i++) {
+                for (int k = i, j = 18; j >= 0 && k < 15; j--, k++) {
+                    int m = k;
+                    int n = j;
+                    for (; m < k + 5 && k + 5 <= 19; m++, n--) {
+                        if (Objects.equals(cells[n][m], AIChessNum)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[n][m], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    if (m == k + 5) {
+                        tempScore = getScore(AIChessNum, manChessNum);
+                        for (m = k, n = j; m < k + 5; m++, n--) {
+                            score[n][m] += tempScore;
+                        }
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+            }
+            for (int i = 0; i < 15; i++) {
+                for (int k = i, j = 0; j < 15 && k < 15; j++, k++) {
+                    int m = k;
+                    int n = j;
+                    for (; m < k + 5 && k + 5 <= 19; m++, n++) {
+                        if (Objects.equals(cells[n][m], AIChessNum)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[n][m], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    if (m == k + 5) {
+                        tempScore = getScore(AIChessNum, manChessNum);
+                        for (m = k, n = j; m < k + 5; m++, n++) {
+                            score[m][n] += tempScore;
+                        }
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+            }
+            for (int i = 1; i < 15; i++) {
+                for (int k = i, j = 0; j < 19 && k < 19; j++, k++) {
+                    int m = k;
+                    int n = j;
+                    for (; m < k + 5 && k + 5 <= 19; m++, n++) {
+                        if (Objects.equals(cells[n][m], AIColor)) {
+                            AIChessNum++;
+                        } else if (Objects.equals(cells[n][m], manColor)) {
+                            manChessNum++;
+                        }
+                    }
+                    if (m == k + 5) {
+                        tempScore = getScore(AIChessNum, manChessNum);
+                        for (m = k, n = j; m < k + 5; m++, n++) {
+                            score[n][m] += tempScore;
+                        }
+                    }
+                    manChessNum = 0;
+                    AIChessNum = 0;
+                }
+            }
+            for (int i = 0; i < cells.length; i++) {
+                for (int j = 0; j < cells[i].length; j++) {
+                    if (Objects.equals(cells[i][j], CellState.NULL) && score[i][j] > maxScore) {
+                        xMax = i;
+                        yMAX = j;
+                        maxScore = score[i][j];
+                    }
+                }
+            }
+            if (xMax != -1 && yMAX != -1) {
+                cells[xMax][yMAX] = AIColor;
+                if (isWin(xMax, yMAX)) {
+                    canPlay = false;
+                    state = WHITE_WIN;
+                    MainUI.this.repaint();
+                }
+
+            }
+            MainUI.this.repaint();
+        }
+    }
 }
