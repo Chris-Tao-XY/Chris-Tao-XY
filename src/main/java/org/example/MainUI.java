@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -151,7 +150,6 @@ public class MainUI extends JFrame {
         private NextPlayer nextPlayer = NextPlayer.BLACK;
         private Integer x;
         private Integer y;
-        private Graphics graphics;
         private AI ai;
 
         @Override
